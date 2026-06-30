@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <title>Venialgo Gestor de Gastos</title>
+    <meta name="description" content="Venialgo Gestor de Gastos - Controla tus finanzas personales de forma fácil y rápida" />
+    <meta name="theme-color" content="#4CAF50" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Venialgo Gastos" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Venialgo Gestor de Gastos" />
+    <meta property="og:description" content="Controla tus finanzas personales de forma fácil y rápida" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_PY" />
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="apple-touch-icon" href="icons/icon-192.svg" />
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+          integrity="sha384-5e2ESR8Ycmos6g3gAKr1Jvwye8sW4U1u/cAKulfVJnkakCcMqhOudbtPnvJ+nbv7"
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"
+            integrity="sha384-e6nUZLBkQ86NJ6TVVKAeSaK8jWa3NhkYWZFomE39AvDbQWeie9PlQqM3pmYW5d1g"
+            crossorigin="anonymous" defer></script>
+
+    <!-- SheetJS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"
+            integrity="sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw"
+            crossorigin="anonymous" defer></script>
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- LOGIN -->
+<!-- ============================================================ -->
+<div id="loginContainer">
+    <div class="login-box">
+        <div class="logo">
+            <i class="fas fa-wallet"></i>
+            <h2>Venialgo Gestor de Gastos</h2>
+            <p>💰 Controla tus finanzas</p>
+        </div>
+
+        <div id="loginError" class="error-msg">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="loginErrorText">Error al iniciar sesión</span>
+        </div>
+
+        <form id="loginForm">
+            <div class="field">
+                <label for="loginEmail"><i class="fas fa-envelope"></i> Correo electrónico</label>
+                <input type="email" id="loginEmail" placeholder="tu@correo.com" required autocomplete="email" />
+            </div>
+            <div class="field">
+                <label for="loginPassword"><i class="fas fa-lock"></i> Contraseña</label>
+                <input type="password" id="loginPassword" placeholder="Ingresa tu contraseña" required autocomplete="current-password" />
+            </div>
+            <button type="submit" class="btn-login" id="btnLogin">
+                <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+            </button>
+        </form>
+
+        <div class="registro-link">
+            ¿No tienes cuenta? <a onclick="mostrarRegistro()">Regístrate aquí</a>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- REGISTRO (modal) -->
+<!-- ============================================================ -->
+<div class="modal-overlay" id="modalRegistro">
+    <div class="modal">
+        <h2><i class="fas fa-user-plus"></i> Crear Cuenta</h2>
+        <form id="registroForm">
+            <div class="field">
+                <label for="regUsuario"><i class="fas fa-user"></i> Nombre de usuario</label>
+                <input type="text" id="regUsuario" placeholder="Elige un usuario" required />
+            </div>
+            <div class="field">
+                <label for="regEmail"><i class="fas fa-envelope"></i> Correo electrónico</label>
+                <input type="email" id="regEmail" placeholder="tu@correo.com" required autocomplete="email" />
+            </div>
+            <div class="field">
+                <label for="regPassword"><i class="fas fa-lock"></i> Contraseña</label>
+                <input type="password" id="regPassword" placeholder="Mínimo 6 caracteres" required minlength="6" />
+            </div>
+            <div class="field">
+                <label for="regConfirm"><i class="fas fa-check-circle"></i> Confirmar Contraseña</label>
+                <input type="password" id="regConfirm" placeholder="Repite tu contraseña" required />
+            </div>
+            <div id="registroError" class="error-msg" style="display:none;">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="registroErrorText">Error en el registro</span>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancelar-modal" onclick="cerrarRegistro()">Cancelar</button>
+                <button type="submit" class="btn-guardar-modal">
+                    <i class="fas fa-user-plus"></i> Registrarse
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- APP PRINCIPAL -->
+<!-- ============================================================ -->
+<div id="appContainer">
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <h1>
+                <i class="fas fa-wallet"></i> Venialgo Gestor de Gastos <small>₲</small>
+            </h1>
+            <div class="header-actions">
+                <div class="user-info">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="usuarioActual">Usuario</span>
+                </div>
+                <button class="btn-categoria" onclick="abrirModalCategorias()">
+                    <i class="fas fa-tags"></i> <span class="hide-mobile">Categorías</span>
+                </button>
+                <button class="btn-excel" onclick="exportarExcel()">
+                    <i class="fas fa-file-excel"></i> <span class="hide-mobile">Exportar</span>
+                </button>
+                <button class="btn-logout" onclick="cerrarSesion()">
+                    <i class="fas fa-sign-out-alt"></i> <span class="hide-mobile">Salir</span>
+                </button>
+                <div class="toggle-dark" id="toggleDark" onclick="toggleModoOscuro()">
+                    <div class="toggle-ball">
+                        <i class="fas fa-sun" id="iconoToggle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FORMULARIO -->
+        <form class="form-gasto" id="formGasto">
+            <div class="field">
+                <label for="concepto"><i class="fas fa-tag"></i> Concepto</label>
+                <input type="text" id="concepto" placeholder="Ej. Supermercado" required />
+            </div>
+            <div class="field">
+                <label for="categoria"><i class="fas fa-list"></i> Categoría</label>
+                <select id="categoria"></select>
+            </div>
+            <div class="field">
+                <label for="monto"><i class="fas fa-money-bill-wave"></i> Monto (₲)</label>
+                <input type="number" id="monto" placeholder="0" step="100" min="100" required />
+            </div>
+            <button type="submit" class="btn-agregar">
+                <i class="fas fa-plus-circle"></i> Agregar
+            </button>
+        </form>
+
+        <!-- DASHBOARD -->
+        <div class="dashboard">
+            <div class="grafico-wrapper">
+                <h3><i class="fas fa-chart-pie"></i> Gastos por Categoría</h3>
+                <canvas id="graficoGastos"></canvas>
+            </div>
+            <div class="resumen-dashboard">
+                <div class="resumen-card">
+                    <div>
+                        <div class="label">Total gastos</div>
+                        <div class="value" id="totalGastos">0</div>
+                    </div>
+                    <i class="fas fa-receipt"></i>
+                </div>
+                <div class="resumen-card">
+                    <div>
+                        <div class="label">Monto total</div>
+                        <div class="value" id="totalMonto">₲ 0</div>
+                    </div>
+                    <i class="fas fa-coins"></i>
+                </div>
+                <div class="resumen-card categoria-mayor">
+                    <div>
+                        <div class="label">Categoría con mayor gasto</div>
+                        <div class="value" id="categoriaMayor">-</div>
+                    </div>
+                    <i class="fas fa-trophy"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- GRÁFICO MENSUAL -->
+        <div class="grafico-wrapper" style="margin-bottom: 1.5rem;">
+            <h3><i class="fas fa-chart-bar"></i> Informe Mensual - Gastos por Mes</h3>
+            <canvas id="graficoMensual" style="max-height: 200px;"></canvas>
+        </div>
+
+        <!-- FILTROS -->
+        <div class="filtros">
+            <label for="filtroCategoria"><i class="fas fa-filter"></i> Categoría:</label>
+            <select id="filtroCategoria">
+                <option value="Todas">Todas</option>
+            </select>
+
+            <div class="busqueda-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" id="busquedaTexto" placeholder="Buscar..." />
+            </div>
+        </div>
+
+        <!-- TABLA -->
+        <div class="tabla-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th data-columna="concepto" class="orden-asc">
+                            Concepto <span class="orden-icono">▼</span>
+                        </th>
+                        <th data-columna="categoria">
+                            Categoría <span class="orden-icono">▼</span>
+                        </th>
+                        <th data-columna="monto">
+                            Monto <span class="orden-icono">▼</span>
+                        </th>
+                        <th data-columna="fecha">
+                            Fecha <span class="orden-icono">▼</span>
+                        </th>
+                        <th style="text-align:center; cursor:default; min-width:70px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaGastos"></tbody>
+            </table>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="app-footer">
+            Hecho por <a href="https://venialgosistemas.sitio.live/" target="_blank" rel="noopener noreferrer">Venialgo Sistemas</a>
+        </footer>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MODAL DE EDICIÓN -->
+<!-- ============================================================ -->
+<div class="modal-overlay" id="modalEditar">
+    <div class="modal">
+        <h2><i class="fas fa-edit"></i> Editar Gasto</h2>
+        <form id="formEditar">
+            <input type="hidden" id="editId" />
+            <div class="field">
+                <label for="editConcepto">Concepto</label>
+                <input type="text" id="editConcepto" required />
+            </div>
+            <div class="field">
+                <label for="editCategoria">Categoría</label>
+                <select id="editCategoria"></select>
+            </div>
+            <div class="field">
+                <label for="editMonto">Monto (₲)</label>
+                <input type="number" id="editMonto" step="100" min="100" required />
+            </div>
+            <div class="field">
+                <label for="editFecha">Fecha</label>
+                <input type="date" id="editFecha" required />
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancelar-modal" onclick="cerrarModal()">Cancelar</button>
+                <button type="submit" class="btn-guardar-modal">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MODAL DE CATEGORÍAS -->
+<!-- ============================================================ -->
+<div class="modal-overlay" id="modalCategorias">
+    <div class="modal">
+        <h2><i class="fas fa-tags"></i> Gestionar Categorías</h2>
+        <div class="field">
+            <label for="nuevaCategoria">Nueva categoría</label>
+            <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                <input type="text" id="nuevaCategoria" placeholder="Ej. Educación" style="flex:1; min-width:120px;" />
+                <button onclick="agregarCategoria()" class="btn-guardar-modal" style="white-space:nowrap;">
+                    <i class="fas fa-plus"></i> Agregar
+                </button>
+            </div>
+        </div>
+        <div class="lista-categorias" id="listaCategorias"></div>
+        <div style="margin-top: 0.8rem; font-size:0.75rem; color:var(--text-muted);">
+            <i class="fas fa-info-circle"></i> Las categorías con gastos no se pueden eliminar
+        </div>
+        <div class="modal-actions">
+            <button type="button" class="btn-cancelar-modal" onclick="cerrarModalCategorias()">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Supabase JS (debe cargar antes que los scripts locales) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+        integrity="sha384-JWEyvHh+lRf0sN/WWY+QTQwX+CyWqmNg4tkc8GQzAMEtR2wGNrCJlvnu1lHD1kDm"
+        crossorigin="anonymous"></script>
+
+<!-- Scripts de la app -->
+<script src="js/supabase.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/app.js"></script>
+
+<!-- Service Worker -->
+<script>
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('sw.js', { scope: './' }).then(function(reg) {
+            console.log('SW registrado correctamente');
+        }).catch(function(err) {
+            console.warn('Error al registrar SW:', err);
+        });
+    });
+}
+</script>
+
+</body>
+</html>

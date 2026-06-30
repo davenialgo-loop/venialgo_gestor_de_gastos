@@ -1,0 +1,12 @@
+# Original backup
+deepseek_html_20260630_0eeb70.html
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
