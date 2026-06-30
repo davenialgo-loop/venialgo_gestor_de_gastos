@@ -746,7 +746,7 @@ document.getElementById('registroForm')?.addEventListener('submit', async functi
     try {
         await registrarUsuario(username, email, password);
     } catch (err) {
-        mostrarErrorRegistro('Error de conexión. Intenta de nuevo.');
+        mostrarErrorRegistro(err.message || 'Error de conexión. Intenta de nuevo.');
         console.error('Registration error:', err);
     } finally {
         btn.disabled = false;
