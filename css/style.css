@@ -697,7 +697,7 @@ tr:hover td {
     backdrop-filter: blur(4px);
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 10000;
     animation: fadeIn 0.3s;
     padding: 1rem;
 }
