@@ -104,6 +104,7 @@ supabase.auth.onAuthStateChange(async (event, session) => {
         document.getElementById('loginContainer').classList.add('hidden');
         document.getElementById('appContainer').classList.add('active');
         await cargarUsername(session.user.id);
+        cerrarRegistro();
         iniciarApp();
     } else if (event === 'SIGNED_OUT') {
         currentUser = null;

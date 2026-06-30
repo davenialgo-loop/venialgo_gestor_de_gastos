@@ -723,6 +723,7 @@ document.getElementById('registroForm')?.addEventListener('submit', async functi
     const email = document.getElementById('regEmail').value.trim();
     const password = document.getElementById('regPassword').value;
     const confirm = document.getElementById('regConfirm').value;
+    const btn = this.querySelector('.btn-guardar-modal');
 
     if (!username || !email || !password || !confirm) {
         mostrarErrorRegistro('Por favor, completa todos los campos');
@@ -739,7 +740,18 @@ document.getElementById('registroForm')?.addEventListener('submit', async functi
         return;
     }
 
-    await registrarUsuario(username, email, password);
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registrando...';
+
+    try {
+        await registrarUsuario(username, email, password);
+    } catch (err) {
+        mostrarErrorRegistro('Error de conexión. Intenta de nuevo.');
+        console.error('Registration error:', err);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-user-plus"></i> Registrarse';
+    }
 });
 
 document.getElementById('formGasto')?.addEventListener('submit', agregarGasto);
